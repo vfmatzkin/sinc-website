@@ -44,6 +44,21 @@ model User {
   courses           CourseInstructor[]
   researchLineEntries ResearchLineEntry[] @relation("AuthoredEntries")
   moderatedEntries   ResearchLineEntry[] @relation("ModeratedEntries")
+
+  phone        String?
+  institution  String?
+  department   String?
+
+  staffVerificationStatus   StaffVerificationStatus @default(UNVERIFIED)
+  staffVerifiedBy           User?                   @relation("StaffVerification", fields: [staffVerifiedById], references: [id])
+  staffVerifiedById         String?
+  staffVerificationDate     DateTime?
+  verifiedStaffUsers        User[]                  @relation("StaffVerification")
+
+  deletionRequestedAt       DateTime?
+  deletionRequester         User?                   @relation("DeletionRequests", fields: [deletionRequestedById], references: [id])
+  deletionRequestedById     String?
+  deletionRequests          User[]                  @relation("DeletionRequests")
 }
 
 // Detailed profile information
@@ -185,7 +200,7 @@ model Publication {
   venue       String      // Journal/Conference name
   citation    String      @db.Text
   createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  updatedAt   DateTime    @default(now())
 }
 
 // Blog posts/news
@@ -197,7 +212,7 @@ model Post {
   authorId  String
   published Boolean   @default(false)
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now())
   tags      Tag[]
 }
 
@@ -244,7 +259,7 @@ model Subscriber {
   email     String    @unique
   verified  Boolean   @default(false)
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now())
 }
 
 model Account {
@@ -338,4 +353,11 @@ enum PubType {
   THESIS
   PATENT
   OTHER
+}
+
+enum StaffVerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
 }

@@ -8,5 +8,9 @@ export default async function DashboardPage() {
     redirect('/api/auth/signin');
   }
 
-  return <div>Welcome to your dashboard, {user.name}!</div>;
+  return (
+    <div className="text-gray-900 dark:text-gray-100">
+      Welcome to your dashboard, {user.name}!
+    </div>
+  );
 }

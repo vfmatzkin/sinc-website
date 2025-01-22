@@ -17,7 +17,7 @@ import { ThemeToggle } from './ThemeToggle';
 const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => (
   <Link 
     href={href} 
-    className="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors flex items-center gap-2"
+    className="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2"
   >
     {children}
   </Link>
