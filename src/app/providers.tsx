@@ -2,6 +2,7 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider } from 'next-themes';
+import { LanguageProvider } from '@/components/LanguageProvider';
 
 export function Providers({ 
   children, 
@@ -18,7 +19,9 @@ export function Providers({
         enableSystem
         disableTransitionOnChange
       >
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </ThemeProvider>
     </SessionProvider>
   )

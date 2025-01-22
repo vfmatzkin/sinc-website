@@ -1,36 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# sinc(i) website
+
+The sinc(i) web application aims to facilitate research collaboration, streamline project management, and support various academic activities within the Research Institute for Signals, Systems, and Computational Intelligence. It plans to integrate essential features such as secure authentication, comprehensive user and research management, and robust course handling to enhance productivity and collaboration within the academic community.
+
+## Features
+
+- **Authentication System**: Secure login through Google OAuth
+- **User Management**: Complete profile system for researchers and staff
+- **Research Management**: Track research lines, projects, and publications
+- **Course Management**: Handle academic courses and materials
+- **Dark Mode Support**: Full dark mode implementation for better user experience
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19
+- **Styling**: Tailwind CSS, next-themes
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18.x or higher
+- PostgreSQL database
+- Google OAuth credentials
+
+### Environment Setup
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/yourusername/sinc-website.git
+cd sinc-website
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a `.env` file in the root directory with the following variables:
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/sinc_db"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Authentication
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+NEXTAUTH_SECRET="your-nextauth-secret"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-## Learn More
+4. Initialize the database:
+```bash
+npx prisma migrate dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+5. Start the development server:
+```bash
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Visit `http://localhost:3000` to see the application.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+src/
+├── app/              # Next.js app router pages
+├── components/       # Reusable React components
+├── lib/             # Utility functions and configurations
+└── types/           # TypeScript type definitions
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Database Schema
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The database is designed to handle:
+- User profiles and roles
+- Research lines and projects
+- Academic publications
+- Course management
+- Staff verification system
+- User relationships (advisor-advisee)
+
+## Available Scripts
+
+- `npm run dev`: Start development server
+- `npm run build`: Build production version
+- `npm start`: Start production server
+- `npm run lint`: Run ESLint
+
+## Development Workflow
+
+1. Create a new branch for your feature:
+```bash
+git checkout -b feature/your-feature-name
+```
+
+2. Make your changes and commit them:
+```bash
+git add .
+git commit -m "Description of your changes"
+```
+
+3. Push to your branch and create a pull request:
+```bash
+git push origin feature/your-feature-name
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+
+## Deployment
+
+The application can be deployed to any platform that supports Next.js applications. We recommend using Vercel for the best integration experience.
+
+1. Connect your repository to Vercel
+2. Configure environment variables
+3. Deploy
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+- Project Maintainer: Franco Matzkin
+- Email: fmatzkin [at] sinc.unl.edu.ar
+
+## Acknowledgments
+
+- [sinc(i) Research Institute](https://sinc.unl.edu.ar/)

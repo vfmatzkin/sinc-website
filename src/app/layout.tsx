@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from './api/auth/[...nextauth]/route'
 import Navbar from '@/components/Navbar'
 import { Providers } from './providers'
+import { LanguageProvider } from '@/components/LanguageProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,17 +32,19 @@ export default async function RootLayout({
         className={`${inter.className} min-h-screen bg-white dark:bg-gray-900 transition-colors flex flex-col`}
       >
         <Providers session={session}>
-          <div className="flex flex-col min-h-screen">
-            <Navbar session={session} />
-            <main className="flex-grow container mx-auto px-4 py-8">
-              {children}
-            </main>
-            <footer className="bg-gray-100 py-6 mt-auto">
-              <div className="container mx-auto text-center text-gray-600">
-                © {new Date().getFullYear()} sinc(i) Platform. All rights reserved.
-              </div>
-            </footer>
-          </div>
+          <LanguageProvider>
+            <div className="flex flex-col min-h-screen">
+              <Navbar session={session} />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <footer className="bg-gray-100 py-6 mt-auto">
+                <div className="container mx-auto text-center text-gray-600">
+                  © {new Date().getFullYear()} sinc(i)
+                </div>
+              </footer>
+            </div>
+          </LanguageProvider>
         </Providers>
       </body>
     </html>

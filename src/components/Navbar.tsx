@@ -13,6 +13,8 @@ import {
   X 
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
+import Image from 'next/image';
 
 const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => (
   <Link 
@@ -36,10 +38,9 @@ export default function Navbar({ session }: { session: Session | null }) {
           href="/" 
           className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2"
         >
-          sinc(i)
+          <Image src="/images/sinc-logo-128.webp" alt="Logo" className="h-12   w-auto" width={128} height={64} />
         </Link>
 
-        {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button 
             onClick={toggleMenu} 
@@ -72,6 +73,7 @@ export default function Navbar({ session }: { session: Session | null }) {
 
         {/* Authentication and Theme Toggle */}
         <div className="flex items-center space-x-4">
+          <LanguageSwitcher />
           <ThemeToggle />
           
           {session ? (

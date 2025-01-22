@@ -59,6 +59,8 @@ model User {
   deletionRequester         User?                   @relation("DeletionRequests", fields: [deletionRequestedById], references: [id])
   deletionRequestedById     String?
   deletionRequests          User[]                  @relation("DeletionRequests")
+
+  language    UserLanguage?
 }
 
 // Detailed profile information
@@ -360,4 +362,52 @@ enum StaffVerificationStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+enum Language {
+  EN
+  ES
+  FR
+  DE
+}
+
+enum ContentType {
+  HOME_DESCRIPTION
+  NAVIGATION
+  BUTTON
+  ERROR
+  FORM_LABEL
+}
+
+model UserLanguage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  language  Language
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
+}
+
+model Content {
+  id          String        @id @default(cuid())
+  key         String        @unique // Unique identifier for this content
+  type        ContentType
+  description String?       // Optional description for content editors
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  translations Translation[]
+}
+
+model Translation {
+  id        String   @id @default(cuid())
+  contentId String
+  content   Content  @relation(fields: [contentId], references: [id])
+  language  Language
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contentId, language])
 }
