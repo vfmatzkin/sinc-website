@@ -1,14 +1,341 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// This is your Prisma schema file
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+// User model with role-based access control
+model User {
+  id            String    @id @default(cuid())
+  name          String?   // changed from String to String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  bio           String?   @db.Text
+  avatar        String?   // URL to avatar image
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          Role      @default(USER)
+  isActive      Boolean   @default(true)
+  
+  // Current and former positions
+  positions       UserPosition[]
+  formerPositions FormerPosition[]
+  
+  // User tags and relations
+  tags            UserTag[]
+  advisorRelations    UserRelation[]  @relation("Advisor")
+  adviseeRelations    UserRelation[]  @relation("Advisee")
+  
+  // Profile and research content
+  profile         Profile?
+  researchLines   ResearchLine[]      @relation("ResearcherLines")
+  projects        Project[]           @relation("ProjectMembers")
+  publications    Publication[]
+  
+  // Content management
+  authoredPosts     Post[]
+  courses           CourseInstructor[]
+  researchLineEntries ResearchLineEntry[] @relation("AuthoredEntries")
+  moderatedEntries   ResearchLineEntry[] @relation("ModeratedEntries")
+}
+
+// Detailed profile information
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  title           String?  // Academic title
+  office          String?  // Office location
+  phone           String?
+  googleScholar   String?  // Google Scholar profile URL
+  orcid           String?  // ORCID identifier
+  researchGate    String?  // ResearchGate profile URL
+  linkedin        String?  // LinkedIn profile URL
+  github          String?  // GitHub profile URL
+  customLinks     Json?    // Additional custom links
+}
+
+// Current positions for users
+model UserPosition {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  position  Position
+  startDate DateTime   @default(now())
+  
+  @@unique([userId, position])
+}
+
+// Historical positions
+model FormerPosition {
+  id        String     @id @default(cuid())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  position  FormerPositionType
+  startDate DateTime
+  endDate   DateTime
+  details   String?    @db.Text
+}
+
+// Tags system
+model Tag {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?   @db.Text
+  posts         Post[]    // For blog posts
+  userTags      UserTag[]
+  userRelations UserRelation[]
+}
+
+// User tags junction
+model UserTag {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  tagId     String
+
+  @@unique([userId, tagId])
+}
+
+// User relationships based on positions and tags
+model UserRelation {
+  id            String          @id @default(cuid())
+  advisor       User            @relation("Advisor", fields: [advisorId], references: [id])
+  advisorId     String
+  advisee       User            @relation("Advisee", fields: [adviseeId], references: [id])
+  adviseeId     String
+  relationType  RelationType
+  tag           Tag             @relation(fields: [tagId], references: [id])
+  tagId         String
+  startDate     DateTime        @default(now())
+  endDate       DateTime?
+  
+  @@unique([adviseeId, advisorId, relationType, tagId])
+}
+
+// Research lines/areas
+model ResearchLine {
+  id          String    @id @default(cuid())
+  name        String
+  description String    @db.Text
+  image       String?   // URL to representative image
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  researchers User[]    @relation("ResearcherLines")
+  projects    Project[]
+  entries     ResearchLineEntry[]
+}
+
+// Research line content entries
+model ResearchLineEntry {
+  id            String        @id @default(cuid())
+  researchLine  ResearchLine  @relation(fields: [researchLineId], references: [id])
+  researchLineId String
+  author        User          @relation("AuthoredEntries", fields: [authorId], references: [id])
+  authorId      String
+  content       String        @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  isVisible     Boolean       @default(true)
+  sortOrder     Int?
+  moderator     User?         @relation("ModeratedEntries", fields: [moderatorId], references: [id])
+  moderatorId   String?
+  lastModerated DateTime?
+}
+
+// Research projects
+model Project {
+  id              String        @id @default(cuid())
+  title           String
+  description     String        @db.Text
+  startDate       DateTime
+  endDate         DateTime?
+  status          ProjectStatus @default(ACTIVE)
+  image           String?       // URL to project image
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  researchLine    ResearchLine  @relation(fields: [researchLineId], references: [id])
+  researchLineId  String
+  members         User[]        @relation("ProjectMembers")
+  publications    Publication[]
+}
+
+// Publications
+model Publication {
+  id          String      @id @default(cuid())
+  title       String
+  abstract    String      @db.Text
+  authors     User[]
+  project     Project?    @relation(fields: [projectId], references: [id])
+  projectId   String?
+  year        Int
+  doi         String?     @unique
+  pdfUrl      String?     // URL to PDF file
+  pubType     PubType
+  venue       String      // Journal/Conference name
+  citation    String      @db.Text
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// Blog posts/news
+model Post {
+  id        String    @id @default(cuid())
+  title     String
+  content   String    @db.Text
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
+  published Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  tags      Tag[]
+}
+
+// Courses
+model Course {
+  id          String    @id @default(cuid())
+  name        String
+  description String    @db.Text
+  startDate   DateTime?
+  endDate     DateTime?
+  isPublic    Boolean   @default(true)
+  
+  instructors CourseInstructor[]
+  materials   CourseMaterial[]
+}
+
+// Course instructors junction
+model CourseInstructor {
+  course      Course    @relation(fields: [courseId], references: [id])
+  courseId    String
+  instructor  User      @relation(fields: [userId], references: [id])
+  userId      String
+  role        String    // e.g., "professor", "teaching assistant"
+
+  @@id([courseId, userId])
+}
+
+// Course materials
+model CourseMaterial {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  fileUrl     String
+  isPublic    Boolean   @default(false)
+  uploadedAt  DateTime  @default(now())
+  
+  course      Course    @relation(fields: [courseId], references: [id])
+  courseId    String
+}
+
+// Newsletter subscribers
+model Subscriber {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  verified  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  RESEARCHER
+  INSTRUCTOR
+  USER
+}
+
+enum Position {
+  ADMINISTRATIVE_STAFF
+  CLUSTER_ADMINISTRATOR
+  GRADUATE_STUDENT
+  MSC_STUDENT
+  PHD_STUDENT
+  POSDOCTORAL_FELLOW
+  RESEARCH_STAFF
+  TECHNICAL_STAFF
+  TECHNICAL_SUPPORT
+  TECHNOLOGY_TRANSFER
+  UNDERGRADUATE_STUDENT
+  VISITING_PROFESSOR
+}
+
+enum FormerPositionType {
+  PHD_STUDENT
+  MSC_STUDENT
+  POSDOCTORAL_FELLOW
+  RESEARCH_STAFF
+  UNDERGRADUATE_STUDENT
+}
+
+enum RelationType {
+  CONICET_ADVISOR
+  CONICET_COADVISOR
+  UNL_ADVISOR
+  UNL_COADVISOR
+  PROJECT_DIRECTOR
+  PROJECT_CODIRECTOR
+  FELLOWSHIP_DIRECTOR
+  FELLOWSHIP_CODIRECTOR
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  SUSPENDED
+}
+
+enum PubType {
+  JOURNAL
+  CONFERENCE
+  BOOK
+  BOOK_CHAPTER
+  THESIS
+  PATENT
+  OTHER
 }
