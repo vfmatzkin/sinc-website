@@ -2,6 +2,39 @@ const { PrismaClient } = require('@prisma/client');
 const db = new PrismaClient();
 
 async function main() {
+  // Create basic permissions
+  const permissions = [
+    { name: 'manage_users', description: 'Can manage user accounts' },
+    { name: 'manage_content', description: 'Can manage site content' },
+    { name: 'manage_research', description: 'Can manage research projects' },
+    { name: 'manage_courses', description: 'Can manage courses' },
+    { name: 'verify_staff', description: 'Can verify staff members' },
+  ];
+
+  for (const permission of permissions) {
+    await db.permission.upsert({
+      where: { name: permission.name },
+      update: {},
+      create: permission,
+    });
+  }
+
+  // Create access groups
+  const accessGroups = [
+    { name: 'administrators', description: 'Full system access' },
+    { name: 'staff', description: 'Staff access' },
+    { name: 'researchers', description: 'Research access' },
+    { name: 'instructors', description: 'Course management access' },
+  ];
+
+  for (const group of accessGroups) {
+    await db.accessGroup.upsert({
+      where: { name: group.name },
+      update: {},
+      create: group,
+    });
+  }
+
   // Create initial content entries
   const homeDescription = await db.content.create({
     data: {

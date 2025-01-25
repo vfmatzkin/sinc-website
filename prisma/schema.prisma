@@ -61,6 +61,25 @@ model User {
   deletionRequests          User[]                  @relation("DeletionRequests")
 
   language    UserLanguage?
+
+  // Authentication and access control
+  lastLogin        DateTime?
+  passwordHash     String?    // For future password auth support
+  twoFactorEnabled Boolean    @default(false)
+  twoFactorSecret  String?
+  
+  // Content access and permissions
+  permissions       Permission[]
+  accessGroups      AccessGroup[]
+  
+  // Audit fields
+  deletedAt         DateTime?
+  version           Int       @default(1)
+  
+  @@index([email])
+  @@index([role])
+  @@index([staffVerificationStatus])
+  @@index([deletedAt])
 }
 
 // Detailed profile information
@@ -270,17 +289,21 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String?   @db.Text
   session_state     String?
+  lastUsed          DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -288,7 +311,12 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  lastActive   DateTime @default(now())
+  ipAddress    String?
+  userAgent    String?
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -299,7 +327,26 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AccessGroup {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum Role {
+  SUPER_ADMIN  // New role for system administration
   ADMIN
   STAFF
   RESEARCHER
