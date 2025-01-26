@@ -64,6 +64,42 @@ npm run dev
 
 Visit `http://localhost:3000` to see the application.
 
+## Testing the Current Functionality
+
+Test the current functionality step by step:
+
+1. Start the development server:
+    ```bash
+    npm run dev
+    ```
+
+2. Visit http://localhost:3000:
+    - A navigation bar with a Sign In button
+    - Theme toggle (dark/light mode)
+    - Language switcher (EN/ES)
+    - Home page content in the selected language
+
+3. Test the authentication flow:
+    - Click "Sign In" in the navbar
+    - Sign in with Google
+    - Return to the home page with profile and sign out options
+
+4. Check the Profile page:
+    - Profile info from Google (name, email)
+    - Options to edit profile or request account deletion
+
+5. Complete your profile:
+    - Click "Edit Profile"
+    - Fill in additional info (phone, institution, department)
+    - Check "I am a staff member" if applicable
+
+6. Inspect the database:
+    ```bash
+    npx prisma studio
+    ```
+Browse tables for user details, OAuth data, active sessions, and language preferences.
+
+
 ## Project Structure
 
 ```

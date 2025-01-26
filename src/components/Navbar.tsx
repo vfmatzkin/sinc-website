@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { signIn, signOut } from 'next-auth/react';
 import { Session } from 'next-auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Home, 
   User, 
@@ -15,6 +15,7 @@ import {
 import { ThemeToggle } from './ThemeToggle';
 import LanguageSwitcher from './LanguageSwitcher';
 import Image from 'next/image';
+import { useTheme } from 'next-themes';
 
 const NavLink = ({ href, children }: { href: string, children: React.ReactNode }) => (
   <Link 
@@ -26,7 +27,13 @@ const NavLink = ({ href, children }: { href: string, children: React.ReactNode }
 );
 
 export default function Navbar({ session }: { session: Session | null }) {
+  const { theme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -38,7 +45,23 @@ export default function Navbar({ session }: { session: Session | null }) {
           href="/" 
           className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2"
         >
-          <Image src="/images/sinc-logo-128.webp" alt="Logo" className="h-12   w-auto" width={128} height={64} />
+          {mounted ? (
+            <Image 
+              src={theme === 'dark' ? "/images/sinc-logo-b.webp" : "/images/sinc-logo-w.webp"} 
+              alt="Logo" 
+              className="h-12 w-auto" 
+              width={128} 
+              height={64} 
+            />
+          ) : (
+            <Image 
+              src="/images/sinc-logo-w.webp" 
+              alt="Logo" 
+              className="h-12 w-auto" 
+              width={128} 
+              height={64} 
+            />
+          )}
         </Link>
 
         <div className="md:hidden">
@@ -62,6 +85,7 @@ export default function Navbar({ session }: { session: Session | null }) {
           py-4 md:py-0
         `}>
           <NavLink href="/"><Home size={16} /> Home</NavLink>
+          <NavLink href="/staff">Staff Directory</NavLink>
           
           {session && (
             <>
