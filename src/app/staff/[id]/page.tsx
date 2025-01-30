@@ -7,9 +7,10 @@ export default async function StaffMemberPage({
 }: { 
   params: { id: string } 
 }) {
+  const { id } = params;
   const member = await prisma.user.findUnique({
     where: {
-      id: params.id,
+      id,
       staffVerificationStatus: 'VERIFIED',
       isActive: true,
     },
@@ -17,6 +18,7 @@ export default async function StaffMemberPage({
       profile: true,
       positions: true,
       researchLines: true,
+      formerPositions: true,
       publications: {
         orderBy: {
           year: 'desc',

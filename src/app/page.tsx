@@ -44,14 +44,13 @@ export default function Home() {
   }, [language]);
 
   return (
-    <div className="relative min-h-screen w-full text-center">
+    <div className="relative h-full w-full text-center">
       <img
         src="images/background.webp"
         alt="Background"
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ minHeight: '100vh' }}
       />
-      <div className="relative z-10 pt-20 px-4 min-h-screen flex flex-col items-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm">
+      <div className="relative z-10 pt-20 px-4 flex flex-col items-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm h-full">
         <h1 className="text-5xl font-bold mb-4 text-gray-800 dark:text-white">
           {content.title}
         </h1>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { type User, type Profile, type UserPosition, type ResearchLine } from '@prisma/client';
+import { ProfileImage } from '@/app/staff/[id]/ProfileImage';
 
 type StaffCardProps = {
   member: User & {
@@ -15,13 +15,13 @@ export function StaffCard({ member }: StaffCardProps) {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
       <div className="flex items-center space-x-4">
         {member.image && (
-          <Image 
-            src={member.image} 
-            alt={member.name || 'Staff member'} 
-            width={64}
-            height={64}
-            className="rounded-full object-cover"
-          />
+          <div className="w-16 h-16 flex-shrink-0">
+            <ProfileImage 
+              src={member.image} 
+              alt={member.name || 'Staff member'} 
+              containerClassName="w-16 h-16"
+            />
+          </div>
         )}
         <div>
           <Link 

@@ -5,7 +5,6 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import prisma from '@/lib/prisma';
 import { Role, StaffVerificationStatus } from '@prisma/client';
 
-// Ensure TypeScript recognizes the updated types in src/types/next-auth.d.ts
 
 declare module 'next-auth' {
   interface Session extends DefaultSession {
@@ -20,7 +19,7 @@ declare module 'next-auth' {
 
 export const authOptions: AuthOptions = {
   // Increase debug level
-  debug: process.env.NODE_ENV === 'development',
+  debug: true, // Temporarily increase debug level to see what's happening
   
   // Use Prisma adapter
   adapter: PrismaAdapter(prisma) as any,
@@ -70,27 +69,42 @@ export const authOptions: AuthOptions = {
     },
     async signIn({ user, account, profile }) {
       try {
+        if (!user.email) return false;
+
+        console.log("Signing in user:", { user, account, profile });
+
+        // First try to find user by email
         const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! }
+          where: { email: user.email },
+          include: { accounts: true }
         });
 
-        if (!existingUser) {
-          // Create new user with default settings
-          await prisma.user.create({
-            data: {
-              email: user.email!,
-              name: user.name!,
-              image: user.image,
-              role: 'USER',
-              staffVerificationStatus: 'UNVERIFIED',
-              language: {
-                create: {
-                  language: 'EN'
-                }
+        if (existingUser) {
+          // If user exists but doesn't have this OAuth account linked
+          const hasProvider = existingUser.accounts.some(
+            acc => acc.provider === account?.provider
+          );
+
+          if (!hasProvider && account) {
+            // Link the new OAuth account to the existing user
+            await prisma.account.create({
+              data: {
+                userId: existingUser.id,
+                type: account.type,
+                provider: account.provider,
+                providerAccountId: profile?.sub || user.id,
+                access_token: account.access_token,
+                token_type: account.token_type,
+                scope: account.scope,
+                id_token: account.id_token,
+                refresh_token: account.refresh_token,
+                expires_at: account.expires_at,
               }
-            }
-          });
+            });
+          }
+          return true;
         }
+
         return true;
       } catch (error) {
         console.error('Error in signIn callback:', error);

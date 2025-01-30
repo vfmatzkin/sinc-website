@@ -11,6 +11,7 @@ export default async function StaffDirectoryPage() {
       profile: true,
       positions: true,
       researchLines: true,
+      formerPositions: true,
     },
     orderBy: {
       name: 'asc',
