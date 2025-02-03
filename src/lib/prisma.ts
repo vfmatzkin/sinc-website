@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient as BasePrismaClient } from '.prisma/client'
 
 const prismaClientSingleton = () => {
-  return new PrismaClient()
+  return new BasePrismaClient()
 }
 
 declare global {
+  // eslint-disable-next-line no-var
   var prisma: undefined | ReturnType<typeof prismaClientSingleton>
 }
 

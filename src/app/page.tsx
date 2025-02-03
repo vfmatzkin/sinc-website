@@ -3,6 +3,7 @@
 import { useLanguage } from '@/components/LanguageProvider';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 
 export default function Home() {
   const { language } = useLanguage();
@@ -12,8 +13,6 @@ export default function Home() {
     signInPrompt: '',
     description: '',
   });
-
-  const isLoading = status === 'loading';
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -44,29 +43,35 @@ export default function Home() {
   }, [language]);
 
   return (
-    <div className="relative h-full w-full text-center">
-      <img
-        src="images/background.webp"
-        alt="Background"
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div className="relative z-10 pt-20 px-4 flex flex-col items-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm h-full">
-        <h1 className="text-5xl font-bold mb-4 text-gray-800 dark:text-white">
-          {content.title}
-        </h1>
-        {session ? (
-          <p className="text-2xl text-gray-700 dark:text-gray-200">
-            {`Hello, ${session.user.name}!`}
-          </p>
-        ) : (
-          <p className="text-2xl text-gray-700 dark:text-gray-200">
-            {content.signInPrompt}
-          </p>
-        )}
-        <div className="max-w-2xl mt-10 p-8 bg-white/80 dark:bg-gray-800/80 rounded-lg shadow-lg backdrop-blur-sm">
-          <p className="text-lg text-gray-800 dark:text-gray-200 leading-relaxed">
-            {content.description}
-          </p>
+    <div className="relative w-full">
+      <div className="absolute inset-0 h-[calc(100vh-10rem)]">
+        <Image
+          src="/images/background.webp"
+          alt="Background"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
+      <div className="relative z-10 flex flex-col items-center bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm h-[calc(100vh-10rem)]">
+        <div className="w-full max-w-6xl mx-auto px-4 py-16 flex flex-col items-center justify-center h-full">
+          <h1 className="text-5xl font-bold mb-6 text-gray-800 dark:text-white text-center">
+            {content.title}
+          </h1>
+          {session ? (
+            <p className="text-2xl text-gray-700 dark:text-gray-200 text-center mb-8">
+              {`👋🏽 ${session.user.name}!`}
+            </p>
+          ) : (
+            <p className="text-2xl text-gray-700 dark:text-gray-200 text-center mb-8">
+              {content.signInPrompt}
+            </p>
+          )}
+          <div className="max-w-2xl w-full p-6 bg-white/80 dark:bg-gray-800/80 rounded-lg shadow-lg backdrop-blur-sm">
+            <p className="text-lg text-gray-800 dark:text-gray-200 leading-relaxed">
+              {content.description}
+            </p>
+          </div>
         </div>
       </div>
     </div>

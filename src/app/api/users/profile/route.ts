@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/lib/prisma';
 
-export async function POST() {
+export async function GET() {
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.id) {
@@ -11,17 +11,16 @@ export async function POST() {
   }
 
   try {
-    const updatedUser = await prisma.user.update({
+    const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      data: {
-        deletionRequestedAt: new Date(),
-        deletionRequester: { connect: { id: session.user.id } }
+      include: {
+        profile: true
       }
     });
 
-    return NextResponse.json(updatedUser);
+    return NextResponse.json(user);
   } catch (error) {
-    console.error('Deletion request error:', error);
-    return NextResponse.json({ error: 'Deletion request failed' }, { status: 500 });
+    console.error('Profile fetch error:', error);
+    return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 });
   }
 }

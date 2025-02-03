@@ -2,6 +2,7 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -67,6 +68,7 @@ model User {
   passwordHash     String?    // For future password auth support
   twoFactorEnabled Boolean    @default(false)
   twoFactorSecret  String?
+  registrationComplete    Boolean   @default(false)
   
   // Content access and permissions
   permissions       Permission[]
@@ -122,11 +124,11 @@ model FormerPosition {
 
 // Tags system
 model Tag {
-  id            String    @id @default(cuid())
-  name          String    @unique
-  description   String?   @db.Text
-  posts         Post[]    // For blog posts
-  userTags      UserTag[]
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?  @db.Text
+  posts       Post[]   // For blog posts
+  userTags    UserTag[]
   userRelations UserRelation[]
 }
 
@@ -164,7 +166,7 @@ model ResearchLine {
   description String    @db.Text
   image       String?   // URL to representative image
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  updatedAt   DateTime  @default(now())
   
   researchers User[]    @relation("ResearcherLines")
   projects    Project[]
@@ -180,7 +182,7 @@ model ResearchLineEntry {
   authorId      String
   content       String        @db.Text
   createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  updatedAt     DateTime      @default(now())
   isVisible     Boolean       @default(true)
   sortOrder     Int?
   moderator     User?         @relation("ModeratedEntries", fields: [moderatorId], references: [id])
@@ -198,7 +200,7 @@ model Project {
   status          ProjectStatus @default(ACTIVE)
   image           String?       // URL to project image
   createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  updatedAt       DateTime      @default(now())
   
   researchLine    ResearchLine  @relation(fields: [researchLineId], references: [id])
   researchLineId  String
@@ -342,7 +344,7 @@ model AccessGroup {
   description String?
   users       User[]
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
 }
 
 enum Role {
@@ -432,7 +434,7 @@ model UserLanguage {
   user      User     @relation(fields: [userId], references: [id])
   language  Language
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 
   @@unique([userId])
 }
@@ -454,7 +456,14 @@ model Translation {
   language  Language
   value     String   @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 
   @@unique([contentId, language])
+}
+
+model Message {
+  id       Int    @id @default(autoincrement())
+  key      String
+  language String
+  text     String
 }
